@@ -8,7 +8,7 @@
 [![Version](https://img.shields.io/badge/version-1.0.0-2196F3.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/hasanbeder/YouTubeTempo/releases)
 [![License](https://img.shields.io/badge/license-GPL--3.0-4CAF50.svg?style=flat-square&logo=gnu&logoColor=white)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/hasanbeder/YouTubeTempo?style=flat-square&logo=github&logoColor=white&color=FFD700)](https://github.com/hasanbeder/YouTubeTempo/stargazers)
-[![Greasyfork](https://img.shields.io/badge/Greasyfork-Install-FF5722.svg?style=flat-square&logo=javascript&logoColor=white)](https://greasyfork.org/en/scripts/youtubetempo)
+[![Greasyfork](https://img.shields.io/badge/Greasyfork-Install-FF5722.svg?style=flat-square&logo=javascript&logoColor=white)](https://greasyfork.org/en/scripts/542866-youtubetempo-ultimate-playback-speed-controller)
 
 </div>
 
@@ -66,7 +66,7 @@
 
 | Method | Description | Link |
 |--------|-------------|------|
-| **🟢 Greasyfork** | Recommended | [![Install](https://img.shields.io/badge/Install-Greasyfork-FF5722.svg?style=for-the-badge&logo=javascript&logoColor=white)](https://greasyfork.org/en/scripts/youtubetempo) |
+| **🟢 Greasyfork** | Recommended | [![Install](https://img.shields.io/badge/Install-Greasyfork-FF5722.svg?style=for-the-badge&logo=javascript&logoColor=white)](https://greasyfork.org/en/scripts/542866-youtubetempo-ultimate-playback-speed-controller) |
 | **📁 GitHub** | Latest version | [![Download](https://img.shields.io/badge/Download-GitHub-181717.svg?style=for-the-badge&logo=github&logoColor=white)](https://raw.githubusercontent.com/hasanbeder/YouTubeTempo/main/YouTubeTempo.user.js) |
 
 </div>
