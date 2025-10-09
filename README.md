@@ -5,7 +5,7 @@
 
 ![YouTubeTempo Screenshot](https://raw.githubusercontent.com/hasanbeder/YouTubeTempo/main/screenshots/screenshot.png)
 
-[![Version](https://img.shields.io/badge/version-1.0.0-2196F3.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/hasanbeder/YouTubeTempo/releases)
+[![Version](https://img.shields.io/badge/version-1.0.1-2196F3.svg?style=flat-square&logo=github&logoColor=white)](https://github.com/hasanbeder/YouTubeTempo/releases)
 [![License](https://img.shields.io/badge/license-GPL--3.0-4CAF50.svg?style=flat-square&logo=gnu&logoColor=white)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/hasanbeder/YouTubeTempo?style=flat-square&logo=github&logoColor=white&color=FFD700)](https://github.com/hasanbeder/YouTubeTempo/stargazers)
 [![Greasyfork](https://img.shields.io/badge/Greasyfork-Install-FF5722.svg?style=flat-square&logo=javascript&logoColor=white)](https://greasyfork.org/en/scripts/542866-youtubetempo-ultimate-playback-speed-controller)
@@ -14,47 +14,30 @@
 
 <div align="center">
   <h3>🎯 Master your YouTube experience with precision speed controls!</h3>
-  <p><em>Take complete control of YouTube playback with fully customizable speed controls, volume booster, keyboard shortcuts, and a clean, accessible interface.</em></p>
+  <p><em>Take complete control of YouTube playback with fully customizable speed controls, keyboard shortcuts, and a clean, accessible interface designed for performance.</em></p>
 </div>
 
 ---
 
 ## ✨ Features
 
-<table>
-<tr>
-<td width="50%">
+### 🎛️ Precision Speed Control 
+- **Custom Speed Steps**: Set your preferred increment from 0.01x to 0.5x. 
+- **Wide Playback Range**: Freely adjust speed from as low as 0.1x up to 16.0x. 
+- **Instant Visual Feedback**: The speed indicator changes color to reflect the current playback rate. 
+- **Playback Memory**: Remembers and automatically applies your last-used speed setting for new videos. 
 
-### 🎛️ **Precision Speed Control**
-- **Custom Speed Steps**: 0.01x to 0.5x increments
-- **Wide Range**: 0.1x to 16.0x configurable speed
-- **Visual Feedback**: Color-coded indicators
-- **Memory**: Remembers your last used speed
+### ⌨️ Fully Customizable Keyboard Shortcuts 
+- **Personalize Your Keys**: Assign any key for slowing down, speeding up, or resetting playback speed. 
+- **Sensible Defaults**: Comes pre-configured with `[` (slower), `]` (faster), and `\` (reset). 
+- **Override Mode**: Optionally prevent your shortcuts from triggering YouTube's default actions. 
+- **Mouse-Free Control**: Manage playback speed without ever leaving the keyboard. 
 
-### 🔊 **Volume Enhancement**
-- **Volume Booster**: Amplify beyond 100%
-- **Web Audio API**: Professional audio processing
-- **Safe Limits**: Prevents audio distortion
-- **Real-time**: Instant volume adjustments
-
-</td>
-<td width="50%">
-
-### ⌨️ **Keyboard Shortcuts**
-- **Fully Customizable**: Set your own shortcuts
-- **Default Keys**: `[` slower, `]` faster, `\` reset
-- **Override Mode**: Disable YouTube's shortcuts
-- **Quick Access**: No mouse required
-
-### 🎨 **Clean Interface**
-- **Seamless Integration**: Matches YouTube's design
-- **Accessibility**: Full ARIA support
-- **Collapsible Menu**: Expandable settings
-- **Visual Indicators**: Real-time feedback
-
-</td>
-</tr>
-</table>
+### 🎨 Clean & Integrated User Interface 
+- **Seamless Design**: The controls are designed to perfectly match YouTube's native player aesthetic. 
+- **Accessible**: Built with ARIA attributes for screen reader compatibility. 
+- **Collapsible Settings Menu**: Access all options in a clean, non-intrusive popup menu. 
+- **Audio Feedback**: Enable or disable subtle sound effects for speed adjustments.
 
 ---
 
@@ -121,16 +104,7 @@ Install a userscript manager first:
 </details>
 
 <details>
-<summary><strong>🔊 Audio Settings</strong></summary>
-
-- **Volume Boost**: Amplification level (1.0x - 3.0x)
-- **Sound Effects**: Enable/disable UI sounds
-- **Audio Context**: Professional audio processing
-
-</details>
-
-<details>
-<summary><strong>🎨 Display Settings</strong></summary>
+<summary><strong>🎨 General & UI Settings</strong></summary>
 
 - **Remaining Time**: Show time left calculation
 - **Color Indicators**: Speed-based color coding
@@ -171,15 +145,7 @@ Install a userscript manager first:
 
 </details>
 
-<details>
-<summary><strong>🔊 Volume boost not working</strong></summary>
 
-- 🔓 Allow audio permissions when prompted
-- 🌐 Check Web Audio API browser support
-- 🔄 Try refreshing the page
-- 📱 Test on different browser
-
-</details>
 
 ---
 
