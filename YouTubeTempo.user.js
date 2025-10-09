@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         YouTubeTempo - Ultimate Playback Speed Controller
 // @namespace    https://github.com/hasanbeder/YouTubeTempo
-// @version      1.0.0
-// @description  Master your YouTube experience with fully customizable, precision speed controls, a volume booster, and a clean, accessible, collapsible settings menu.
+// @version      1.0.1
+// @description  Master your YouTube experience with fully customizable, precision speed controls, and a clean, accessible, collapsible settings menu.
 // @license      GPL-3.0
 // @author       hasanbeder
 // @match        https://www.youtube.com/*
@@ -28,7 +28,6 @@
             speedStep: 0.05,
             minSpeed: 0.25,
             maxSpeed: 4.0,
-            volumeBoost: 1.0,
             shortcutSlower: '[',
             shortcutReset: '\\',
             shortcutFaster: ']'
@@ -58,7 +57,6 @@
             shortcutSlower: 'youtubetempo-shortcut-slower',
             shortcutReset: 'youtubetempo-shortcut-reset',
             shortcutFaster: 'youtubetempo-shortcut-faster',
-            volumeBoost: 'youtubetempo-volume-boost',
             overrideYouTubeShortcuts: 'youtubetempo-override-youtube-shortcuts',
             isSoundEffectsEnabled: 'youtubetempo-sound-effects-enabled'
         },
@@ -127,7 +125,6 @@
         .youtubetempo-settings-input { width:50px; background:rgba(255,255,255,0.1); border:1px solid transparent; border-radius:2px; color:#fff; padding:3px 5px; font-size:12px; text-align:center; outline:none; transition:all .1s ease; font-family:"YouTube Noto",Roboto,Arial,Helvetica,sans-serif; }
         .youtubetempo-settings-input-invalid { border-color: rgba(255, 82, 82, 0.7) !important; background: rgba(255, 82, 82, 0.1) !important; }
         .youtubetempo-settings-input[type="text"] { width: 70px; text-align: left; }
-        .youtubetempo-settings-input[type="range"] { flex-grow: 1; padding: 0; margin: 0; width: 90px; }
         .youtubetempo-settings-controls-wrapper { display: flex; align-items: center; gap: 8px; }
         .youtubetempo-settings-input-display { width: 40px; text-align: center; }
         .youtubetempo-settings-input:focus { border-color:#3ea6ff; background:rgba(62,166,255,0.1); }
@@ -151,7 +148,6 @@
 
     // Holds the dynamic state of the script.
     const state = {
-        audioContext: null, gainNode: null, audioSourceNode: null,
         currentVideoElement: null, settingsWrapperElement: null, speedIndicatorElement: null,
         remainingTimeElement: null, settingsMenuElement: null, isSettingsUIVisible: false,
         videoMutationObserver: null, activePlayerControls: null, liveIndicatorCache: null,
@@ -163,7 +159,7 @@
     const userConfig = {
         speedStep: CONFIG.speedStep, minSpeed: CONFIG.minSpeed, maxSpeed: CONFIG.maxSpeed,
         isRemainingTimeEnabled: true, shortcutSlower: CONFIG.shortcuts.slower,
-        shortcutReset: CONFIG.shortcuts.reset, shortcutFaster: CONFIG.shortcuts.faster, volumeBoost: 1.0,
+        shortcutReset: CONFIG.shortcuts.reset, shortcutFaster: CONFIG.shortcuts.faster,
         overrideYouTubeShortcuts: false, isSoundEffectsEnabled: true
     };
 
@@ -171,9 +167,6 @@
     class ErrorHandler {
         static handle(error, context) {
             console.error(`YouTubeTempo Error in ${context}:`, error);
-            if (error.name === 'NotAllowedError' || error.message.includes("permission")) {
-                this.showNotification('Audio permission required for Volume Boost. Please refresh and allow.');
-            }
             if (CONFIG.enableErrorReporting) this.reportError(error, context);
         }
         static showNotification(message) {
@@ -224,7 +217,6 @@
             userConfig.shortcutSlower = this.load(CONFIG.storageKeys.shortcutSlower, CONFIG.defaults.shortcutSlower);
             userConfig.shortcutReset = this.load(CONFIG.storageKeys.shortcutReset, CONFIG.defaults.shortcutReset);
             userConfig.shortcutFaster = this.load(CONFIG.storageKeys.shortcutFaster, CONFIG.defaults.shortcutFaster);
-            userConfig.volumeBoost = this.load(CONFIG.storageKeys.volumeBoost, CONFIG.defaults.volumeBoost);
             userConfig.overrideYouTubeShortcuts = this.load(CONFIG.storageKeys.overrideYouTubeShortcuts, false);
             userConfig.isSoundEffectsEnabled = this.load(CONFIG.storageKeys.isSoundEffectsEnabled, true);
         }
@@ -281,42 +273,39 @@
 
     // Manages all audio-related functionality.
     const Audio = {
-        getContext() {
-            if (!state.audioContext) {
-                try { state.audioContext = new(window.AudioContext || window.webkitAudioContext)(); }
-                catch (e) { ErrorHandler.handle(e, 'AudioContext initialization'); return null; }
-            }
-            if (state.audioContext.state === 'suspended') state.audioContext.resume();
-            return state.audioContext;
-        },
         playSound(type) {
-            const ctx = this.getContext(); if (!ctx) return;
-            const now = ctx.currentTime, oscillator = ctx.createOscillator(), gain = ctx.createGain();
-            gain.gain.setValueAtTime(0.2, now);
-            gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.1);
-            oscillator.connect(gain); gain.connect(ctx.destination);
-            switch (type) {
-                case 'slower': oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(800, now); oscillator.frequency.exponentialRampToValueAtTime(200, now + 0.1); break;
-                case 'reset': oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(330, now); gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.08); break;
-                case 'faster': oscillator.type = 'sine'; oscillator.frequency.setValueAtTime(600, now); oscillator.frequency.exponentialRampToValueAtTime(1200, now + 0.1); break;
-            }
-            oscillator.start(now); oscillator.stop(now + 0.12);
-        },
-        setupBooster(videoElement) {
-            const ctx = this.getContext();
-            if (!ctx || !videoElement || (state.audioSourceNode && state.audioSourceNode.mediaElement === videoElement)) return;
-            if (state.audioSourceNode) try { state.audioSourceNode.disconnect(); } catch (e) {}
-            if (state.gainNode) try { state.gainNode.disconnect(); } catch (e) {}
             try {
-                state.audioSourceNode = ctx.createMediaElementSource(videoElement);
-                state.gainNode = ctx.createGain();
-                state.audioSourceNode.connect(state.gainNode);
-                state.gainNode.connect(ctx.destination);
-                this.applyVolumeBoost(userConfig.volumeBoost);
-            } catch (e) { ErrorHandler.handle(e, 'Audio booster setup'); state.audioSourceNode = null; state.gainNode = null; }
-        },
-        applyVolumeBoost(level) {
-            if (state.gainNode && state.audioContext) state.gainNode.gain.setValueAtTime(level, state.audioContext.currentTime);
+                const ctx = new(window.AudioContext || window.webkitAudioContext)();
+                const now = ctx.currentTime,
+                    oscillator = ctx.createOscillator(),
+                    gain = ctx.createGain();
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.1);
+                oscillator.connect(gain);
+                gain.connect(ctx.destination);
+                switch (type) {
+                    case 'slower':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(800, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(200, now + 0.1);
+                        break;
+                    case 'reset':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(330, now);
+                        gain.gain.exponentialRampToValueAtTime(0.00001, now + 0.08);
+                        break;
+                    case 'faster':
+                        oscillator.type = 'sine';
+                        oscillator.frequency.setValueAtTime(600, now);
+                        oscillator.frequency.exponentialRampToValueAtTime(1200, now + 0.1);
+                        break;
+                }
+                oscillator.start(now);
+                oscillator.stop(now + 0.12);
+                setTimeout(() => ctx.close(), 500); // Clean up context after sound plays
+            } catch (e) {
+                ErrorHandler.handle(e, 'Audio.playSound');
+            }
         }
     };
 
@@ -446,7 +435,7 @@
             titleGroup.appendChild(titleText);
 
             const versionSpan = document.createElement('span');
-            const scriptVersion = (typeof GM_info !== 'undefined' && GM_info.script) ? GM_info.script.version : '1.0.0';
+            const scriptVersion = (typeof GM_info !== 'undefined' && GM_info.script) ? GM_info.script.version : '1.0.1';
             versionSpan.textContent = `v${scriptVersion}`;
             versionSpan.style.fontSize = '10px';
             versionSpan.style.color = 'rgba(255,255,255,0.6)';
@@ -566,52 +555,6 @@
             switchDiv.append(input, slider); row.append(label, switchDiv);
             return row;
         },
-        _createSliderRow(labelText, storageKey, configKey, min, max, step, defaultValue, description = null) {
-            const row = document.createElement('div'); row.className = 'youtubetempo-settings-row';
-            if (description) row.title = description;
-
-            const label = document.createElement('div'); label.className = 'youtubetempo-settings-label';
-            const resetButton = document.createElement('button');
-            resetButton.className = 'youtubetempo-settings-reset-btn'; resetButton.innerHTML = ICONS.settingsResetIcon;
-            resetButton.title = 'Reset to default';
-            resetButton.setAttribute('aria-label', `Reset ${labelText.replace(':', '')} to default`);
-            resetButton.onclick = () => {
-                input.value = defaultValue;
-                valueDisplay.textContent = `${Math.round(defaultValue * 100)}%`;
-                userConfig[configKey] = defaultValue;
-                Storage.save(storageKey, defaultValue);
-                Audio.applyVolumeBoost(defaultValue);
-                ErrorHandler.showNotification(`${labelText.replace(':', '')} reset to default.`);
-            };
-            label.append(resetButton, document.createTextNode(labelText));
-
-            const controlsWrapper = document.createElement('div'); controlsWrapper.className = 'youtubetempo-settings-controls-wrapper';
-            const input = document.createElement('input');
-            input.className = 'youtubetempo-settings-input'; input.type = 'range';
-            input.value = userConfig[configKey]; input.min = min; input.max = max; input.step = step;
-
-            if (description) {
-                const descId = `desc-${configKey}`;
-                input.setAttribute('aria-describedby', descId);
-                const descSpan = document.createElement('span');
-                descSpan.id = descId;
-                descSpan.className = 'youtubetempo-sr-only';
-                descSpan.textContent = description;
-                row.appendChild(descSpan);
-            }
-
-            const valueDisplay = document.createElement('span');
-            valueDisplay.className = 'youtubetempo-settings-input-display';
-            valueDisplay.textContent = `${Math.round(userConfig[configKey] * 100)}%`;
-            valueDisplay.setAttribute('aria-live', 'polite');
-            input.oninput = () => {
-                const newValue = parseFloat(input.value); valueDisplay.textContent = `${Math.round(newValue * 100)}%`;
-                userConfig[configKey] = newValue; Audio.applyVolumeBoost(newValue);
-            };
-            input.onchange = () => { Storage.save(storageKey, input.value); };
-            controlsWrapper.append(input, valueDisplay); row.append(label, controlsWrapper);
-            return row;
-        },
         _createShortcutRow(labelText, storageKey, configKey, defaultValue, description = null) {
             const row = document.createElement('div'); row.className = 'youtubetempo-settings-row';
             if (description) row.title = description;
@@ -678,7 +621,7 @@
             };
             input.onfocus = () => input.value = 'Press a key...';
             input.onblur = () => input.value = userConfig[configKey];
-            
+
             if (description) {
                 const descId = `desc-${configKey}`;
                 input.setAttribute('aria-describedby', descId);
@@ -704,7 +647,6 @@
                 this._createRow('Max Speed:', CONFIG.storageKeys.settingsMaxSpeed, 'maxSpeed', 1.0, 16.0, 0.1, CONFIG.defaults.maxSpeed, 'The maximum allowed playback speed.')
             ];
             const audioContent = [
-                this._createSliderRow('Volume Boost:', CONFIG.storageKeys.volumeBoost, 'volumeBoost', 0, 3, 0.05, CONFIG.defaults.volumeBoost, 'Boost volume beyond 100%. High levels may cause distortion or damage speakers/headphones.'),
                 this._createToggleRow('Enable Sound Effects', CONFIG.storageKeys.isSoundEffectsEnabled, 'isSoundEffectsEnabled', 'Plays a sound effect when changing speed.')
             ];
             const shortcutsContent = [
@@ -792,9 +734,6 @@
         },
         cleanup() {
             if (state.cleanupFunctions.length) { state.cleanupFunctions.forEach(fn => fn()); state.cleanupFunctions = []; }
-            if (state.audioSourceNode) try { state.audioSourceNode.disconnect(); } catch (e) {} finally { state.audioSourceNode = null; }
-            if (state.gainNode) try { state.gainNode.disconnect(); } catch (e) {} finally { state.gainNode = null; }
-            if (state.audioContext && state.audioContext.state !== 'closed') { state.audioContext.close(); state.audioContext = null; }
             if (state.videoMutationObserver) { state.videoMutationObserver.disconnect(); state.videoMutationObserver = null; }
             UI.cleanup();
             state.currentVideoElement = null;
@@ -845,7 +784,6 @@
                     if (state.videoMutationObserver) state.videoMutationObserver.disconnect();
                     state.currentVideoElement = video;
                     EventHandlers.setupVideoEventListeners(state.currentVideoElement);
-                    Audio.setupBooster(state.currentVideoElement);
                     state.videoMutationObserver = new MutationObserver(() => { Core.loadAndApplyPersistedSpeed(); UI.updateRemainingTime(); });
                     state.videoMutationObserver.observe(video, { attributes: true, attributeFilter: ['src'] });
                     Core.loadAndApplyPersistedSpeed();
