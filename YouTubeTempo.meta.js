@@ -1,8 +1,8 @@
 // ==UserScript==
 // @name         YouTubeTempo - Ultimate Playback Speed Controller
 // @namespace    https://github.com/hasanbeder/YouTubeTempo
-// @version      1.0.0
-// @description  Master your YouTube experience with fully customizable, precision speed controls, a volume booster, and a clean, accessible, collapsible settings menu.
+// @version      1.0.1
+// @description  Master your YouTube experience with fully customizable, precision speed controls, and a clean, accessible, collapsible settings menu.
 // @license      GPL-3.0
 // @author       hasanbeder
 // @match        https://www.youtube.com/*
